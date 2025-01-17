@@ -10,6 +10,7 @@
 #include "jemalloc/internal/rtree.h"
 #include "jemalloc/internal/safety_check.h"
 #include "jemalloc/internal/util.h"
+#include "jemalloc/internal/log.h"
 
 JEMALLOC_DIAGNOSTIC_DISABLE_SPURIOUS
 
@@ -258,14 +259,18 @@ arena_extents_dirty_dalloc(tsdn_t *tsdn, arena_t *arena,
 	witness_assert_depth_to_rank(tsdn_witness_tsdp_get(tsdn),
 	    WITNESS_RANK_CORE, 0);
 
+	LOG("decay", "arena_extents_dirty_dalloc");
 	extents_dalloc(tsdn, arena, r_extent_hooks, &arena->extents_dirty,
 	    extent);
 	if (arena_dirty_decay_ms_get(arena) == 0) {
+		LOG("decay", "arena_extents_dirty_dalloc -> arena_decay_dirty");
 		arena_decay_dirty(tsdn, arena, false, true);
 	} else {
+		LOG("decay", "arena_extents_dirty_dalloc -> arena_background_thread_inactivity_check");
 		arena_background_thread_inactivity_check(tsdn, arena, false);
 	}
 }
+
 
 static void *
 arena_slab_reg_alloc(extent_t *slab, const bin_info_t *bin_info) {
@@ -547,7 +552,7 @@ arena_decay_deadline_reached(const arena_decay_t *decay, const nstime_t *time) {
 	return (nstime_compare(&decay->deadline, time) <= 0);
 }
 
-static size_t
+size_t
 arena_decay_backlog_npages_limit(const arena_decay_t *decay) {
 	uint64_t sum;
 	size_t npages_limit_backlog;
@@ -713,6 +718,7 @@ arena_decay_ms_valid(ssize_t decay_ms) {
 static bool
 arena_maybe_decay(tsdn_t *tsdn, arena_t *arena, arena_decay_t *decay,
     extents_t *extents, bool is_background_thread) {
+	LOG("decay", "arena_maybe_decay");
 	malloc_mutex_assert_owner(tsdn, &decay->mtx);
 
 	/* Purge all or nothing if the option is disabled. */
@@ -920,6 +926,7 @@ arena_decay_to_limit(tsdn_t *tsdn, arena_t *arena, arena_decay_t *decay,
 	    WITNESS_RANK_CORE, 1);
 	malloc_mutex_assert_owner(tsdn, &decay->mtx);
 
+	LOG("decay", "arena_decay_to_limit");
 	if (decay->purging) {
 		return;
 	}
@@ -947,6 +954,7 @@ arena_decay_to_limit(tsdn_t *tsdn, arena_t *arena, arena_decay_t *decay,
 static bool
 arena_decay_impl(tsdn_t *tsdn, arena_t *arena, arena_decay_t *decay,
     extents_t *extents, bool is_background_thread, bool all) {
+	LOG("decay", "arena_decay_impl");
 	if (all) {
 		malloc_mutex_lock(tsdn, &decay->mtx);
 		arena_decay_to_limit(tsdn, arena, decay, extents, all, 0,
@@ -982,6 +990,7 @@ arena_decay_impl(tsdn_t *tsdn, arena_t *arena, arena_decay_t *decay,
 static bool
 arena_decay_dirty(tsdn_t *tsdn, arena_t *arena, bool is_background_thread,
     bool all) {
+	LOG("decay", "arena_decay_dirty");
 	return arena_decay_impl(tsdn, arena, &arena->decay_dirty,
 	    &arena->extents_dirty, is_background_thread, all);
 }
@@ -989,12 +998,15 @@ arena_decay_dirty(tsdn_t *tsdn, arena_t *arena, bool is_background_thread,
 static bool
 arena_decay_muzzy(tsdn_t *tsdn, arena_t *arena, bool is_background_thread,
     bool all) {
+	LOG("decay", "arena_decay_muzzy");
 	return arena_decay_impl(tsdn, arena, &arena->decay_muzzy,
 	    &arena->extents_muzzy, is_background_thread, all);
 }
 
 void
 arena_decay(tsdn_t *tsdn, arena_t *arena, bool is_background_thread, bool all) {
+	// background_work_sleep_once
+	LOG("decay", "arena_decay");
 	if (arena_decay_dirty(tsdn, arena, is_background_thread, all)) {
 		return;
 	}
@@ -1005,6 +1017,7 @@ static void
 arena_slab_dalloc(tsdn_t *tsdn, arena_t *arena, extent_t *slab) {
 	arena_nactive_sub(arena, extent_size_get(slab) >> LG_PAGE);
 
+	LOG("decay", "arena_slab_dalloc");
 	extent_hooks_t *extent_hooks = EXTENT_HOOKS_INITIALIZER;
 	arena_extents_dirty_dalloc(tsdn, arena, &extent_hooks, slab);
 }
