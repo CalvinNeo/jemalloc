@@ -7,6 +7,7 @@
 #include "jemalloc/internal/sc.h"
 #include "jemalloc/internal/sz.h"
 #include "jemalloc/internal/ticker.h"
+#include "jemalloc/internal/log.h"
 
 JEMALLOC_ALWAYS_INLINE bool
 arena_has_default_hooks(arena_t *arena) {
@@ -114,14 +115,17 @@ arena_decay_ticks(tsdn_t *tsdn, arena_t *arena, unsigned nticks) {
 	tsd_t *tsd;
 	ticker_t *decay_ticker;
 
+	LOG("decay", "arena_decay_ticks");
 	if (unlikely(tsdn_null(tsdn))) {
 		return;
 	}
 	tsd = tsdn_tsd(tsdn);
 	decay_ticker = decay_ticker_get(tsd, arena_ind_get(arena));
 	if (unlikely(decay_ticker == NULL)) {
+		LOG("decay", "arena_decay_ticks decay_ticker==nullptr");
 		return;
 	}
+	LOG("decay", "arena_decay_ticks decay_ticker==%lu", decay_ticker->tick);
 	if (unlikely(ticker_ticks(decay_ticker, nticks))) {
 		arena_decay(tsdn, arena, false, false);
 	}

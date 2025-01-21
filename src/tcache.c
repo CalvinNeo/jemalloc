@@ -544,6 +544,8 @@ tcache_flush(tsd_t *tsd) {
 
 static void
 tcache_destroy(tsd_t *tsd, tcache_t *tcache, bool tsd_tcache) {
+	LOG("decay", "tcache_destroy");
+
 	tcache_flush_cache(tsd, tcache);
 	arena_t *arena = tcache->arena;
 	tcache_arena_dissociate(tsd_tsdn(tsd), tcache);

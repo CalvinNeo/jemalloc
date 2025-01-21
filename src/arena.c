@@ -658,6 +658,7 @@ arena_decay_epoch_advance(tsdn_t *tsdn, arena_t *arena, arena_decay_t *decay,
 	decay->nunpurged = (npages_limit > current_npages) ? npages_limit :
 	    current_npages;
 
+	LOG("decay", "arena_decay_epoch_advance %lu", decay->nunpurged);
 	if (!background_thread_enabled() || is_background_thread) {
 		arena_decay_try_purge(tsdn, arena, decay, extents,
 		    current_npages, npages_limit, is_background_thread);
@@ -760,7 +761,10 @@ arena_maybe_decay(tsdn_t *tsdn, arena_t *arena, arena_decay_t *decay,
 	 * epoch, so as a result purging only happens during epoch advances, or
 	 * being triggered by background threads (scheduled event).
 	 */
+	
 	bool advance_epoch = arena_decay_deadline_reached(decay, &time);
+	LOG("decay", "arena_decay_epoch_advance time %lu deadline %d", time, decay->deadline);
+
 	if (advance_epoch) {
 		arena_decay_epoch_advance(tsdn, arena, decay, extents, &time,
 		    is_background_thread);
@@ -1745,6 +1749,7 @@ arena_dalloc_small(tsdn_t *tsdn, void *ptr) {
 	extent_t *extent = iealloc(tsdn, ptr);
 	arena_t *arena = extent_arena_get(extent);
 
+	LOG("decay", "arena_dalloc_small");
 	arena_dalloc_bin(tsdn, arena, extent, ptr);
 	arena_decay_tick(tsdn, arena);
 }

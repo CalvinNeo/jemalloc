@@ -52,7 +52,7 @@ arena_background_thread_inactivity_check(tsdn_t *tsdn, arena_t *arena,
     bool is_background_thread) {
 
 	if (!background_thread_enabled() || is_background_thread) {
-		LOG("decay", "arena_background_thread_inactivity_check -> return");
+		LOG("decay", "arena_background_thread_inactivity_check -> return %d %d", (int)background_thread_enabled(), (int)is_background_thread);
 		return;
 	}
 	background_thread_info_t *info =

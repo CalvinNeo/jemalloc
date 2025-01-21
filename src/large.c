@@ -98,6 +98,7 @@ large_ralloc_no_move_shrink(tsdn_t *tsdn, extent_t *extent, size_t usize) {
 	size_t oldusize = extent_usize_get(extent);
 	extent_hooks_t *extent_hooks = extent_hooks_get(arena);
 	size_t diff = extent_size_get(extent) - (usize + sz_large_pad);
+	LOG("decay", "large_ralloc_no_move_shrink");
 
 	assert(oldusize > usize);
 
@@ -343,6 +344,7 @@ large_dalloc_prep_impl(tsdn_t *tsdn, arena_t *arena, extent_t *extent,
 static void
 large_dalloc_finish_impl(tsdn_t *tsdn, arena_t *arena, extent_t *extent) {
 	extent_hooks_t *extent_hooks = EXTENT_HOOKS_INITIALIZER;
+	LOG("decay", "large_dalloc_finish_impl");
 	arena_extents_dirty_dalloc(tsdn, arena, &extent_hooks, extent);
 }
 
@@ -358,6 +360,7 @@ large_dalloc_finish(tsdn_t *tsdn, extent_t *extent) {
 
 void
 large_dalloc(tsdn_t *tsdn, extent_t *extent) {
+	LOG("decay", "large_dalloc");
 	arena_t *arena = extent_arena_get(extent);
 	large_dalloc_prep_impl(tsdn, arena, extent, false);
 	large_dalloc_finish_impl(tsdn, arena, extent);
