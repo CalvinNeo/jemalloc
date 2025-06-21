@@ -1405,6 +1405,8 @@ arena_tcache_fill_small(tsdn_t *tsdn, arena_t *arena, tcache_t *tcache,
 		prof_idump(tsdn);
 	}
 
+	LOG("decay", "arena_tcache_fill_small");
+
 	unsigned binshard;
 	bin_t *bin = arena_bin_choose_lock(tsdn, arena, binind, &binshard);
 
@@ -1484,6 +1486,8 @@ arena_malloc_small(tsdn_t *tsdn, arena_t *arena, szind_t binind, bool zero) {
 	usize = sz_index2size(binind);
 	unsigned binshard;
 	bin = arena_bin_choose_lock(tsdn, arena, binind, &binshard);
+
+	LOG("decay", "arena_malloc_small");
 
 	if ((slab = bin->slabcur) != NULL && extent_nfree_get(slab) > 0) {
 		ret = arena_slab_reg_alloc(slab, &bin_infos[binind]);
@@ -1784,6 +1788,7 @@ arena_ralloc_no_move(tsdn_t *tsdn, void *ptr, size_t oldsize, size_t size,
 			goto done;
 		}
 
+		LOG("decay", "arena_ralloc_no_move -> arena_decay_tick");
 		arena_decay_tick(tsdn, extent_arena_get(extent));
 		ret = false;
 	} else if (oldsize >= SC_LARGE_MINCLASS

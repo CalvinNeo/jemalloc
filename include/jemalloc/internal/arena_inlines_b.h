@@ -115,7 +115,6 @@ arena_decay_ticks(tsdn_t *tsdn, arena_t *arena, unsigned nticks) {
 	tsd_t *tsd;
 	ticker_t *decay_ticker;
 
-	LOG("decay", "arena_decay_ticks");
 	if (unlikely(tsdn_null(tsdn))) {
 		return;
 	}

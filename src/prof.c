@@ -2052,6 +2052,7 @@ prof_idump(tsdn_t *tsdn) {
 
 	cassert(config_prof);
 
+	LOG("prof", "prof_idump prof_booted %d tsdn_null(tsdn) %d prof_active_get_unlocked() %d", prof_booted, tsdn_null(tsdn), prof_active_get_unlocked());
 	if (!prof_booted || tsdn_null(tsdn) || !prof_active_get_unlocked()) {
 		return;
 	}
@@ -2069,6 +2070,7 @@ prof_idump(tsdn_t *tsdn) {
 		return;
 	}
 
+	LOG("prof", "DO");
 	if (opt_prof_prefix[0] != '\0') {
 		char filename[PATH_MAX + 1];
 		malloc_mutex_lock(tsd_tsdn(tsd), &prof_dump_seq_mtx);

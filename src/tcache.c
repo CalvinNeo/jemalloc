@@ -143,6 +143,8 @@ tcache_bin_flush_small(tsd_t *tsd, tcache_t *tcache, cache_bin_t *tbin,
 	unsigned nflush = tbin->ncached - rem;
 	VARIABLE_ARRAY(extent_t *, item_extent, nflush);
 
+	LOG("decay", "tcache_bin_flush_small -> arena_decay_ticks");
+
 	/* Look up extent once per item. */
 	if (config_opt_safety_checks) {
 		tbin_extents_lookup_size_check(tsd_tsdn(tsd), tbin, binind,
@@ -238,6 +240,8 @@ tcache_bin_flush_large(tsd_t *tsd, cache_bin_t *tbin, szind_t binind,
 	assert(tcache_arena != NULL);
 	unsigned nflush = tbin->ncached - rem;
 	VARIABLE_ARRAY(extent_t *, item_extent, nflush);
+	
+	LOG("decay", "tcache_bin_flush_large");
 
 #ifndef JEMALLOC_EXTRA_SIZE_CHECK
 	/* Look up extent once per item. */

@@ -227,6 +227,8 @@ large_ralloc_no_move(tsdn_t *tsdn, extent_t *extent, size_t usize_min,
 	assert(oldusize >= SC_LARGE_MINCLASS
 	    && usize_max >= SC_LARGE_MINCLASS);
 
+	LOG("decay", "large_ralloc_no_move");
+
 	if (usize_max > oldusize) {
 		/* Attempt to expand the allocation in-place. */
 		if (!large_ralloc_no_move_expand(tsdn, extent, usize_max,
