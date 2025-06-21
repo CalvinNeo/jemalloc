@@ -1994,6 +1994,7 @@ static void
 prof_dump_filename(char *filename, char v, uint64_t vseq) {
 	cassert(config_prof);
 
+	LOG("prof", "prof_dump_filename %s", filename);
 	if (vseq != VSEQ_INVALID) {
 	        /* "<prefix>.<pid>.<seq>.v<vseq>.heap" */
 		malloc_snprintf(filename, DUMP_FILENAME_BUFSIZE,
