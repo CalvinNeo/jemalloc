@@ -2025,6 +2025,7 @@ prof_fdump(void) {
 	assert(tsd_reentrancy_level_get(tsd) == 0);
 
 	malloc_mutex_lock(tsd_tsdn(tsd), &prof_dump_seq_mtx);
+	LOG("prof", "DO prof_fdump");
 	prof_dump_filename(filename, 'f', VSEQ_INVALID);
 	malloc_mutex_unlock(tsd_tsdn(tsd), &prof_dump_seq_mtx);
 	prof_dump(tsd, false, filename, opt_prof_leak);
@@ -2071,7 +2072,7 @@ prof_idump(tsdn_t *tsdn) {
 		return;
 	}
 
-	LOG("prof", "DO");
+	LOG("prof", "DO prof_idump");
 	if (opt_prof_prefix[0] != '\0') {
 		char filename[PATH_MAX + 1];
 		malloc_mutex_lock(tsd_tsdn(tsd), &prof_dump_seq_mtx);
@@ -2091,6 +2092,7 @@ prof_mdump(tsd_t *tsd, const char *filename) {
 		return true;
 	}
 	char filename_buf[DUMP_FILENAME_BUFSIZE];
+	LOG("prof", "DO prof_mdump");
 	if (filename == NULL) {
 		/* No filename specified, so automatically generate one. */
 		if (opt_prof_prefix[0] == '\0') {
@@ -2129,6 +2131,7 @@ prof_gdump(tsdn_t *tsdn) {
 		return;
 	}
 
+	LOG("prof", "DO prof_gdump");
 	if (opt_prof_prefix[0] != '\0') {
 		char filename[DUMP_FILENAME_BUFSIZE];
 		malloc_mutex_lock(tsdn, &prof_dump_seq_mtx);
