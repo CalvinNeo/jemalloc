@@ -112,9 +112,25 @@ void keep_allocate() {
     constexpr int N = 2048;
     std::vector<std::string*> v;
     while(true) {
-        v.push_back(new std::string(100 * 1024, 'A'));
-        printf("rss %lu\n", get_rss());
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        v.push_back(new std::string(512 * 1024, 'A'));
+        size_t allocated, retained, mapped;
+        size_t p_allocated, p_retained, p_mapped, p_rss;
+        size_t sz = sizeof(allocated);
+        size_t epoch;
+        mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
+        mallctl("stats.allocated", &allocated, &sz, NULL, 0);
+        mallctl("stats.retained", &retained, &sz, NULL, 0);
+        mallctl("stats.mapped", &mapped, &sz, NULL, 0);
+        size_t rss = get_rss();
+        printf("rss %lu allocated %lu retained %lu mapped %lu, (%lu, %lu, %lu, %lu)\n", 
+            rss, allocated / 1024, retained / 1024, mapped / 1024,
+            rss-p_rss, (allocated-p_allocated) / 1024, (retained-p_retained) / 1024, (mapped-p_mapped) / 1024
+        );
+        p_allocated = allocated;
+        p_retained = retained;
+        p_mapped = mapped;
+        p_rss = rss;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 
